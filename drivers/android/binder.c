@@ -1869,6 +1869,7 @@ err_fd_not_accepted:
 	return ret;
 }
 
+<<<<<<< HEAD
 static int binder_translate_fd_array(struct binder_fd_array_object *fda,
 				     struct binder_buffer_object *parent,
 				     struct binder_transaction *t,
@@ -1973,6 +1974,8 @@ static int binder_fixup_parent(struct binder_transaction *t,
 	return 0;
 }
 
+=======
+>>>>>>> 6d600c46fff... android: binder: refactor binder_transact()
 static void binder_transaction(struct binder_proc *proc,
 			       struct binder_thread *thread,
 			       struct binder_transaction_data *tr, int reply,
@@ -2247,6 +2250,7 @@ static void binder_transaction(struct binder_proc *proc,
 							    in_reply_to);
 
 			if (target_fd < 0) {
+<<<<<<< HEAD
 				return_error = BR_FAILED_REPLY;
 				goto err_translate_failed;
 			}
@@ -2320,6 +2324,13 @@ static void binder_transaction(struct binder_proc *proc,
 			}
 			last_fixup_obj = bp;
 			last_fixup_min_off = 0;
+=======
+				return_error = BR_FAILED_REPLY;
+				goto err_translate_failed;
+			}
+			fp->pad_binder = 0;
+			fp->fd = target_fd;
+>>>>>>> 6d600c46fff... android: binder: refactor binder_transact()
 		} break;
 		default:
 			binder_user_error("%d:%d got transaction with invalid object type, %x\n",
