@@ -229,6 +229,7 @@ struct binder_context {
 	struct binder_node *binder_context_mgr_node;
 	kuid_t binder_context_mgr_uid;
 	const char *name;
+<<<<<<< HEAD
 
 	struct mutex binder_main_lock;
 	struct mutex binder_deferred_lock;
@@ -250,6 +251,13 @@ struct binder_device {
 	struct hlist_node hlist;
 	struct miscdevice miscdev;
 	struct binder_context context;
+=======
+};
+
+static struct binder_context global_context = {
+	.binder_context_mgr_uid = INVALID_UID,
+	.name = "binder",
+>>>>>>> e498c741372... android: binder: deal with contexts in debugfs.
 };
 
 struct binder_work {
@@ -4387,15 +4395,27 @@ static int binder_proc_show(struct seq_file *m, void *unused)
 		if (do_lock)
 			binder_lock(context, __func__);
 
+<<<<<<< HEAD
 		hlist_for_each_entry(itr, &context->binder_procs, proc_node) {
 			if (itr->pid == pid) {
 				seq_puts(m, "binder proc state:\n");
 				print_binder_proc(m, itr, 1);
 			}
+=======
+	hlist_for_each_entry(itr, &binder_procs, proc_node) {
+		if (itr->pid == pid) {
+			seq_puts(m, "binder proc state:\n");
+			print_binder_proc(m, itr, 1);
+>>>>>>> e498c741372... android: binder: deal with contexts in debugfs.
 		}
 		if (do_lock)
 			binder_unlock(context, __func__);
 	}
+<<<<<<< HEAD
+=======
+	if (do_lock)
+		binder_unlock(__func__);
+>>>>>>> e498c741372... android: binder: deal with contexts in debugfs.
 	return 0;
 }
 
