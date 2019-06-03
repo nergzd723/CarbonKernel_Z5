@@ -8,7 +8,7 @@ static char proc_cmdline[COMMAND_LINE_SIZE];
 
 static int cmdline_proc_show(struct seq_file *m, void *v)
 {
-	seq_printf(m, "%s\n", proc_cmdline;
+	seq_printf(m, "%s\n", proc_cmdline);
 	return 0;
 }
 
