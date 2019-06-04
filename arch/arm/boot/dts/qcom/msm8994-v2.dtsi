@@ -280,7 +280,7 @@
 
 /* GPU overrides */
 &msm_gpu {
-	qcom,initial-pwrlevel = <4>;
+	qcom,initial-pwrlevel = <5>;
 	qcom,msm-bus,num-cases = <10>;
 	qcom,msm-bus,vectors-KBps =
 		<26 512 0 0>,
@@ -311,7 +311,7 @@
 
 		qcom,gpu-pwrlevel@1 {
 			reg = <1>;
-			qcom,gpu-freq = <510000000>;
+			qcom,gpu-freq = <530000000>;
 			qcom,bus-freq = <7>;
 			qcom,bus-min = <6>;
 			qcom,bus-max = <8>;
@@ -319,7 +319,7 @@
 
 		qcom,gpu-pwrlevel@2 {
 			reg = <2>;
-			qcom,gpu-freq = <450000000>;
+			qcom,gpu-freq = <460000000>;
 			qcom,bus-freq = <6>;
 			qcom,bus-min = <5>;
 			qcom,bus-max = <7>;
@@ -327,7 +327,7 @@
 
 		qcom,gpu-pwrlevel@3 {
 			reg = <3>;
-			qcom,gpu-freq = <390000000>;
+			qcom,gpu-freq = <410000000>;
 			qcom,bus-freq = <5>;
 			qcom,bus-min = <4>;
 			qcom,bus-max = <6>;
@@ -335,14 +335,14 @@
 
 		qcom,gpu-pwrlevel@4 {
 			reg = <4>;
-			qcom,gpu-freq = <305000000>;
+			qcom,gpu-freq = <310000000>;
 			qcom,bus-freq = <3>;
 			qcom,bus-min = <2>;
 			qcom,bus-max = <4>;
 		};
 		qcom,gpu-pwrlevel@5 {
 			reg = <5>;
-			qcom,gpu-freq = <180000000>;
+			qcom,gpu-freq = <185000000>;
 			qcom,bus-freq = <2>;
 			qcom,bus-min = <1>;
 			qcom,bus-max = <3>;
