@@ -192,8 +192,7 @@ SUBARCH := $(shell uname -m | sed -e s/i.86/x86/ -e s/x86_64/x86/ \
 # "make" in the configured kernel build directory always uses that.
 # Default value for CROSS_COMPILE is not to prefix executables
 # Note: Some architectures assign CROSS_COMPILE in their arch/*/Makefile
-ARCH		?= $(SUBARCH)
-CROSS_COMPILE	?= $(CONFIG_CROSS_COMPILE:"%"=%)
+ARCH		?= arm64
 
 # Architecture as present in compile.h
 UTS_MACHINE 	:= $(ARCH)
@@ -239,10 +238,10 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 	  else if [ -x /bin/bash ]; then echo /bin/bash; \
 	  else echo sh; fi ; fi)
 
-HOSTCC       = gcc
+HOSTCC       = ccache gcc
 HOSTCXX      = g++
-HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu89
-HOSTCXXFLAGS = -O2
+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 -fomit-frame-pointer -std=gnu89
+HOSTCXXFLAGS = -O3
 
 # Decide whether to build built-in, modular, or both.
 # Normally, just do built-in.
@@ -375,6 +374,31 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Wno-format-security \
 		   -fno-delete-null-pointer-checks \
 		   -std=gnu89
+KBUILD_CFLAGS   += -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+	   -fno-strict-aliasing -fno-common \
+	   -Werror-implicit-function-declaration \
+	   -Wno-format-security \
+	   -fdiagnostics-color=always \
+	   -fno-delete-null-pointer-checks \
+    -fno-schedule-insns \
+    -flive-range-shrinkage \
+    -fira-loop-pressure -ftree-vectorize \
+    -ftree-loop-distribution -ftree-loop-distribute-patterns \
+    -ftree-loop-ivcanon \
+    -fshrink-wrap -mtune=cortex-a53 \
+    -march=armv8-a+crc+crypto -fmodulo-sched -fmodulo-sched-allow-regmoves \
+    -fgraphite -fgraphite-identity -floop-strip-mine -floop-block \
+    -fivopts \
+    -finline-small-functions -fpartial-inlining -findirect-inlining \
+    -foptimize-sibling-calls \
+    -fdevirtualize -fdevirtualize-speculatively \
+    -fgcse -fgcse-lm -fgcse-sm -fgcse-las -fgcse-after-reload \
+    -ftree-loop-im -funswitch-loops \
+    -fpredictive-commoning \
+    -fipa-cp -fipa-sra  \
+    -Wno-maybe-uninitialized -Wno-misleading-indentation \
+    -Wno-array-bounds -Wno-shift-overflow \
+    -std=gnu89 $(call cc-option,-fno-PIE)
 
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
