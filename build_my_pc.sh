@@ -3,7 +3,7 @@ export KERNELDIR=~/CarbonKernel_Z5
 cd $KERNELDIR
 export ANYKERNEL=$KERNELDIR/AnyKernel2
 make clean && make mrproper
-TOOLCHAINDIR=~/aarch64-linux-android-4.9-linarp/
+TOOLCHAINDIR=~/aarch64-linux-android-4.9-linaro/
 export ARCH=arm64
 export KBUILD_BUILD_USER="x0r3d"
 export KBUILD_BUILD_HOST="L1nux1sX0R1N6"
