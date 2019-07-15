@@ -173,22 +173,12 @@ int fb_copy_cmap(const struct fb_cmap *from, struct fb_cmap *to)
 		fromoff = to->start - from->start;
 	else
 		tooff = from->start - to->start;
-<<<<<<< HEAD
-	if ((to->len <= tooff) || (from->len <= fromoff))
-		return -EINVAL;
-
-	size = to->len - tooff;
-
-	if (size > (int) (from->len - fromoff))
-		size = from->len - fromoff;
-=======
 	if (fromoff >= from->len || tooff >= to->len)
 		return -EINVAL;
 
 	size = min_t(size_t, to->len - tooff, from->len - fromoff);
 	if (size == 0)
 		return -EINVAL;
->>>>>>> 435cbe0725bdd6e41cf9df93f1e98ba1e38a5cb6
 	size *= sizeof(u16);
 
 	if (from->red && to->red)
