@@ -3341,6 +3341,7 @@ out:
 }
 
 static void addrconf_dad_start(struct inet6_ifaddr *ifp)
+<<<<<<< HEAD
 {
 	bool begin_dad = false;
 
@@ -3357,6 +3358,24 @@ static void addrconf_dad_start(struct inet6_ifaddr *ifp)
 
 static void addrconf_dad_work(struct work_struct *w)
 {
+=======
+{
+	bool begin_dad = false;
+
+	spin_lock_bh(&ifp->state_lock);
+	if (ifp->state != INET6_IFADDR_STATE_DEAD) {
+		ifp->state = INET6_IFADDR_STATE_PREDAD;
+		begin_dad = true;
+	}
+	spin_unlock_bh(&ifp->state_lock);
+
+	if (begin_dad)
+		addrconf_mod_dad_work(ifp, 0);
+}
+
+static void addrconf_dad_work(struct work_struct *w)
+{
+>>>>>>> 435cbe0725bdd6e41cf9df93f1e98ba1e38a5cb6
 	struct inet6_ifaddr *ifp = container_of(to_delayed_work(w),
 						struct inet6_ifaddr,
 						dad_work);
@@ -3383,6 +3402,7 @@ static void addrconf_dad_work(struct work_struct *w)
 
 	if (action == DAD_BEGIN) {
 		addrconf_dad_begin(ifp);
+<<<<<<< HEAD
 		goto out;
 	} else if (action == DAD_ABORT) {
 		in6_ifa_hold(ifp);
@@ -3391,8 +3411,21 @@ static void addrconf_dad_work(struct work_struct *w)
 	}
 
 	if (!ifp->dad_probes && addrconf_dad_end(ifp))
+=======
+>>>>>>> 435cbe0725bdd6e41cf9df93f1e98ba1e38a5cb6
+		goto out;
+	} else if (action == DAD_ABORT) {
+		in6_ifa_hold(ifp);
+		addrconf_dad_stop(ifp, 1);
+		goto out;
+	}
+
+<<<<<<< HEAD
+=======
+	if (!ifp->dad_probes && addrconf_dad_end(ifp))
 		goto out;
 
+>>>>>>> 435cbe0725bdd6e41cf9df93f1e98ba1e38a5cb6
 	write_lock_bh(&idev->lock);
 	if (idev->dead || !(idev->if_flags & IF_READY)) {
 		write_unlock_bh(&idev->lock);
