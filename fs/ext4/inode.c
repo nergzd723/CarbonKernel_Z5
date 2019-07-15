@@ -758,10 +758,6 @@ has_zeroout:
 		int ret = check_block_validity(inode, map);
 		if (ret != 0)
 			return ret;
-<<<<<<< HEAD
-=======
-
->>>>>>> 435cbe0725bdd6e41cf9df93f1e98ba1e38a5cb6
 		/*
 		 * Inodes with freshly allocated blocks where contents will be
 		 * visible after transaction commit must be on transaction's
@@ -1128,10 +1124,6 @@ static int ext4_write_end(struct file *file,
 	int i_size_changed = 0;
 
 	trace_ext4_write_end(inode, pos, len, copied);
-<<<<<<< HEAD
-
-=======
->>>>>>> 435cbe0725bdd6e41cf9df93f1e98ba1e38a5cb6
 	if (ext4_has_inline_data(inode)) {
 		ret = ext4_write_inline_data_end(inode, pos, len,
 						 copied, page);

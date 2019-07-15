@@ -28,6 +28,7 @@
 #include <linux/init.h>
 #include <linux/nmi.h>
 #include <linux/console.h>
+#include <linux/crash_notes.h>
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/exception.h>
