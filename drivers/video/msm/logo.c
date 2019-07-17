@@ -177,12 +177,14 @@ static void __init draw_logo(void)
 	}
 }
 
+// x0r3d: Force redraw a boot logo
+
 int __init logo_init(void)
 {
-	if (display_on_in_boot)
-		pr_info("Skip drawing logo. Already drawn in boot.\n");
-	else if (!load_565rle_image(INIT_IMAGE_FILE))
+		pr_info("Force redraw...\n");
+		if (!load_565rle_image(INIT_IMAGE_FILE))
 		draw_logo();
+		pr_info("Re-drawed!\n");
 
 	return 0;
 }
