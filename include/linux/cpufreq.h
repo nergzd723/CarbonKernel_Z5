@@ -86,6 +86,7 @@ struct cpufreq_policy {
 	struct list_head        policy_list;
 	struct kobject		kobj;
 	struct completion	kobj_unregister;
+	struct cpufreq_frequency_table	*freq_table;
 
 	/*
 	 * The rules for this semaphore:
@@ -485,6 +486,16 @@ static inline int cpufreq_generic_exit(struct cpufreq_policy *policy)
 {
 	cpufreq_frequency_table_put_attr(policy->cpu);
 	return 0;
+}
+
+static inline bool cpufreq_next_valid(struct cpufreq_frequency_table **pos)
+{
+	while ((*pos)->frequency != CPUFREQ_TABLE_END)
+		if ((*pos)->frequency != CPUFREQ_ENTRY_INVALID)
+			return true;
+		else
+			(*pos)++;
+	return false;
 }
 
 /*********************************************************************

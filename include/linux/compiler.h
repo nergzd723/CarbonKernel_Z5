@@ -63,6 +63,14 @@ extern void __chk_io_ptr(const volatile void __iomem *);
 # include <linux/compiler-intel.h>
 #endif
 
+#ifdef __clang__
+#include <linux/compiler-clang.h>
+#endif
+
+
+
+
+
 /*
  * Generic compiler-dependent macros required for kernel
  * build go below this comment. Actual compiler/compiler version
