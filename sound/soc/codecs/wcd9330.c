@@ -5677,7 +5677,7 @@ unsigned int tomtom_read(struct snd_soc_codec *codec,
 #ifdef CONFIG_SOUND_CONTROL_HAX_3_GPL
 EXPORT_SYMBOL(tomtom_read);
 #endif
-c
+
 static int tomtom_startup(struct snd_pcm_substream *substream,
 		struct snd_soc_dai *dai)
 {

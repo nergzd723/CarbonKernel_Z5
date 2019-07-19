@@ -2,7 +2,7 @@
 export KERNELDIR=~/CarbonKernel_Z5
 cd $KERNELDIR
 export ANYKERNEL=$KERNELDIR/AnyKernel2
-make clean && make mrproper
+make clean
 TOOLCHAINDIR=~/aarch64-linux-android-4.9-linaro/
 export ARCH=arm64
 export KBUILD_BUILD_USER="x0r3d"
@@ -14,7 +14,7 @@ export FINALZIP=kernel.zip
 
 make clean && make mrproper
 make kitakami_sumire_defconfig
-make -j$( nproc --all )
+make  -j$( nproc --all )
 
 cp arch/arm64/boot/Image.gz-dtb $ANYKERNEL
 cd $ANYKERNEL
