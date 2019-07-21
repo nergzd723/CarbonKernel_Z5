@@ -1,7 +1,7 @@
 #!/bin/bash
 export KERNELDIR=~/CarbonKernel_Z5
 cd $KERNELDIR
-export ANYKERNEL=$KERNELDIR/AnyKernel2
+export ANYKERNEL=$KERNELDIR/AnyKernel3
 make clean
 TOOLCHAINDIR=~/aarch64-linux-android-4.9-linaro/
 export ARCH=arm64
