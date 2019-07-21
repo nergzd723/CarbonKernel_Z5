@@ -3807,7 +3807,6 @@ static int dwc3_msm_probe(struct platform_device *pdev)
 	dwc3_msm_debugfs_init(mdwc);
 
 	pm_runtime_set_active(mdwc->dev);
-	pm_runtime_enable(mdwc->dev);
 
 	/* Get initial P3 status and enable IN_P3 event */
 	tmp = dwc3_msm_read_reg_field(mdwc->base,
