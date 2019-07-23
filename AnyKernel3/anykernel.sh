@@ -4,7 +4,7 @@
 ## AnyKernel setup
 # begin properties
 properties() { '
-kernel.string=CarbonKernel by x0r3d @ 4PDA
+kernel.string=CarbonKernel by x0r3d and nergZd723 @ 4PDA
 do.devicecheck=1
 do.modules=0
 do.cleanup=1
