@@ -1686,6 +1686,7 @@ int sched_set_boost(int enable)
 
 	return ret;
 }
+EXPORT_SYMBOL_GPL(sched_set_boost);
 
 int sched_boost_handler(struct ctl_table *table, int write,
 		void __user *buffer, size_t *lenp,
