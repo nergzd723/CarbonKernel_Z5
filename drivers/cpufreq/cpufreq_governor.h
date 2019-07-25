@@ -173,6 +173,8 @@ struct od_dbs_tuners {
 };
 
 struct cs_dbs_tuners {
+	unsigned int down_threshold_suspended;
+	unsigned int sleep_depth;
 	unsigned int ignore_nice_load;
 	unsigned int sampling_rate;
 	unsigned int sampling_down_factor;
