@@ -33,6 +33,11 @@ config POWERSUSPEND_DEBUG
 	  Output debugging info in dmesg [POWERSUSPEND] (Yank555.lu)
 
 
+config BOEFFLA_WL_BLOCKER
+	bool "Boeffla generic wakelock blocker driver"
+	depends on PM
+	default N
+
 config HAS_WAKELOCK
 	bool
 	default y
