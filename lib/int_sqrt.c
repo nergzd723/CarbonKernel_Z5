@@ -14,9 +14,10 @@
  *
  * A very rough approximation to the sqrt() function.
  */
-unsigned long int_sqrt(unsigned long x)
+// x0r3d: Some optimizations to sqrt calc
+inline unsigned long int_sqrt(unsigned long x)
 {
-	unsigned long b, m, y = 0;
+	register unsigned long b, m, y = 0;
 
 	if (x <= 1)
 		return x;
