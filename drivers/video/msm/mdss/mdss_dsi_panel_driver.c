@@ -36,7 +36,7 @@
 #include "mdss_dsi.h"
 
 #define DT_CMD_HDR 6
-#define MIN_REFRESH_RATE 30
+#define MIN_REFRESH_RATE 45
 #define DEFAULT_MDP_TRANSFER_TIME 14000
 
 #define DEFAULT_FPS_LOG_INTERVAL 100
