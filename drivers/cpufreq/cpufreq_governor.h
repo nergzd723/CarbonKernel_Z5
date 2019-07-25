@@ -271,3 +271,4 @@ void od_register_powersave_bias_handler(unsigned int (*f)
 		unsigned int powersave_bias);
 void od_unregister_powersave_bias_handler(void);
 #endif /* _CPUFREQ_GOVERNOR_H */
+
