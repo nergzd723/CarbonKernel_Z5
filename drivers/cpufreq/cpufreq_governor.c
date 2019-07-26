@@ -21,7 +21,6 @@
 #include <linux/slab.h>
 
 #include "cpufreq_governor.h"
-
 static struct attribute_group *get_sysfs_attr(struct dbs_data *dbs_data)
 {
 	if (have_governor_per_policy())
@@ -35,16 +34,34 @@ void dbs_check_cpu(struct dbs_data *dbs_data, int cpu)
 	struct cpu_dbs_common_info *cdbs = dbs_data->cdata->get_cpu_cdbs(cpu);
 	struct od_dbs_tuners *od_tuners = dbs_data->tuners;
 	struct cs_dbs_tuners *cs_tuners = dbs_data->tuners;
+	struct zz_dbs_tuners *zz_tuners = dbs_data->tuners;
 	struct cpufreq_policy *policy;
+	unsigned int sampling_rate;
 	unsigned int max_load = 0;
 	unsigned int ignore_nice;
 	unsigned int j;
 
-	if (dbs_data->cdata->governor == GOV_ONDEMAND)
-		ignore_nice = od_tuners->ignore_nice_load;
-	else
-		ignore_nice = cs_tuners->ignore_nice_load;
+	if (dbs_data->cdata->governor == GOV_ONDEMAND) {
+		struct od_cpu_dbs_info_s *od_dbs_info =
+				dbs_data->cdata->get_cpu_dbs_info_s(cpu);
 
+		/*
+		 * Sometimes, the ondemand governor uses an additional
+		 * multiplier to give long delays. So apply this multiplier to
+		 * the 'sampling_rate', so as to keep the wake-up-from-idle
+		 * detection logic a bit conservative.
+		 */
+		sampling_rate = od_tuners->sampling_rate;
+		sampling_rate *= od_dbs_info->rate_mult;
+
+		ignore_nice = od_tuners->ignore_nice_load;
+	} else if (dbs_data->cdata->governor == GOV_ZZMOOVE) {
+		sampling_rate = zz_tuners->sampling_rate;
+		ignore_nice = zz_tuners->ignore_nice_load;
+	} else {
+		sampling_rate = cs_tuners->sampling_rate;
+		ignore_nice = cs_tuners->ignore_nice_load;
+	}
 	policy = cdbs->cur_policy;
 
 	/* Get Absolute Load */
@@ -96,7 +113,47 @@ void dbs_check_cpu(struct dbs_data *dbs_data, int cpu)
 		if (unlikely(!wall_time || wall_time < idle_time))
 			continue;
 
-		load = 100 * (wall_time - idle_time) / wall_time;
+				/*
+		 * If the CPU had gone completely idle, and a task just woke up
+		 * on this CPU now, it would be unfair to calculate 'load' the
+		 * usual way for this elapsed time-window, because it will show
+		 * near-zero load, irrespective of how CPU intensive that task
+		 * actually is. This is undesirable for latency-sensitive bursty
+		 * workloads.
+		 *
+		 * To avoid this, we reuse the 'load' from the previous
+		 * time-window and give this task a chance to start with a
+		 * reasonably high CPU frequency. (However, we shouldn't over-do
+		 * this copy, lest we get stuck at a high load (high frequency)
+		 * for too long, even when the current system load has actually
+		 * dropped down. So we perform the copy only once, upon the
+		 * first wake-up from idle.)
+		 *
+		 * Detecting this situation is easy: the governor's deferrable
+		 * timer would not have fired during CPU-idle periods. Hence
+		 * an unusually large 'wall_time' (as compared to the sampling
+		 * rate) indicates this scenario.
+		 *
+		 * prev_load can be zero in two cases and we must recalculate it
+		 * for both cases:
+		 * - during long idle intervals
+		 * - explicitly set to zero
+		 */
+		if (unlikely(wall_time > (2 * sampling_rate) &&
+			     j_cdbs->prev_load)) {
+			load = j_cdbs->prev_load;
+
+			/*
+			 * Perform a destructive copy, to ensure that we copy
+			 * the previous load only once, upon the first wake-up
+			 * from idle.
+			 */
+			j_cdbs->prev_load = 0;
+		} else {
+			load = 100 * (wall_time - idle_time) / wall_time;
+			j_cdbs->prev_load = load;
+		}
+
 
 		if (load > max_load)
 			max_load = load;
@@ -118,9 +175,10 @@ void gov_queue_work(struct dbs_data *dbs_data, struct cpufreq_policy *policy,
 		unsigned int delay, bool all_cpus)
 {
 	int i;
-
+	DEFINE_MUTEX(cpufreq_governor_lock);
+	mutex_lock(&cpufreq_governor_lock);
 	if (!policy->governor_enabled)
-		return;
+		goto out;
 
 	if (!all_cpus) {
 		/*
@@ -135,7 +193,11 @@ void gov_queue_work(struct dbs_data *dbs_data, struct cpufreq_policy *policy,
 		for_each_cpu(i, policy->cpus)
 			__gov_queue_work(i, dbs_data, delay);
 	}
+	out:
+	mutex_unlock(&cpufreq_governor_lock);
 }
+
+
 EXPORT_SYMBOL_GPL(gov_queue_work);
 
 static inline void gov_cancel_work(struct dbs_data *dbs_data,
@@ -175,6 +237,9 @@ static void set_sampling_rate(struct dbs_data *dbs_data,
 	if (dbs_data->cdata->governor == GOV_CONSERVATIVE) {
 		struct cs_dbs_tuners *cs_tuners = dbs_data->tuners;
 		cs_tuners->sampling_rate = sampling_rate;
+	} else if (dbs_data->cdata->governor == GOV_ZZMOOVE) {
+		struct zz_dbs_tuners *zz_tuners = dbs_data->tuners;
+		zz_tuners->sampling_rate = sampling_rate;
 	} else {
 		struct od_dbs_tuners *od_tuners = dbs_data->tuners;
 		od_tuners->sampling_rate = sampling_rate;
@@ -187,9 +252,11 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 	struct dbs_data *dbs_data;
 	struct od_cpu_dbs_info_s *od_dbs_info = NULL;
 	struct cs_cpu_dbs_info_s *cs_dbs_info = NULL;
+	struct zz_cpu_dbs_info_s *zz_dbs_info = NULL;
 	struct od_ops *od_ops = NULL;
 	struct od_dbs_tuners *od_tuners = NULL;
 	struct cs_dbs_tuners *cs_tuners = NULL;
+	struct zz_dbs_tuners *zz_tuners = NULL;
 	struct cpu_dbs_common_info *cpu_cdbs;
 	unsigned int sampling_rate, latency, ignore_nice, j, cpu = policy->cpu;
 	int io_busy = 0;
@@ -220,11 +287,24 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 
 		dbs_data->cdata = cdata;
 		dbs_data->usage_count = 1;
-		rc = cdata->init(dbs_data);
+
+		if (cdata->governor == GOV_ZZMOOVE) {
+			rc = cdata->init_zz(dbs_data, policy);
+		} else {
+			rc = cdata->init(dbs_data);
+		}
 		if (rc) {
 			pr_err("%s: POLICY_INIT: init() failed\n", __func__);
 			kfree(dbs_data);
 			return rc;
+		}
+		
+		if ((cdata->governor == GOV_ZZMOOVE) &&
+				(!policy->governor->initialized)) {
+			struct zz_ops *zz_ops = dbs_data->cdata->gov_ops;
+
+			cpufreq_register_notifier(zz_ops->notifier_block,
+					CPUFREQ_TRANSITION_NOTIFIER);
 		}
 
 		if (!have_governor_per_policy())
@@ -279,6 +359,13 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 						CPUFREQ_TRANSITION_NOTIFIER);
 			}
 
+			if ((dbs_data->cdata->governor == GOV_ZZMOOVE) &&
+				(policy->governor->initialized == 1)) {
+				struct zz_ops *zz_ops = dbs_data->cdata->gov_ops;
+
+				cpufreq_unregister_notifier(zz_ops->notifier_block,
+						CPUFREQ_TRANSITION_NOTIFIER);
+			}
 			cdata->exit(dbs_data);
 			kfree(dbs_data);
 			cdata->gdbs_data = NULL;
@@ -295,6 +382,11 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 		cs_dbs_info = dbs_data->cdata->get_cpu_dbs_info_s(cpu);
 		sampling_rate = cs_tuners->sampling_rate;
 		ignore_nice = cs_tuners->ignore_nice_load;
+	} else if (dbs_data->cdata->governor == GOV_ZZMOOVE) {
+		zz_tuners = dbs_data->tuners;
+		zz_dbs_info = dbs_data->cdata->get_cpu_dbs_info_s(cpu);
+		sampling_rate = zz_tuners->sampling_rate;
+		ignore_nice = zz_tuners->ignore_nice_load;
 	} else {
 		od_tuners = dbs_data->tuners;
 		od_dbs_info = dbs_data->cdata->get_cpu_dbs_info_s(cpu);
@@ -314,11 +406,19 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 		for_each_cpu(j, policy->cpus) {
 			struct cpu_dbs_common_info *j_cdbs =
 				dbs_data->cdata->get_cpu_cdbs(j);
+			unsigned int prev_load;
 
 			j_cdbs->cpu = j;
 			j_cdbs->cur_policy = policy;
 			j_cdbs->prev_cpu_idle = get_cpu_idle_time(j,
 					       &j_cdbs->prev_cpu_wall, io_busy);
+
+			
+			prev_load = (unsigned int)
+				(j_cdbs->prev_cpu_wall - j_cdbs->prev_cpu_idle);
+			j_cdbs->prev_load = 100 * prev_load /
+					(unsigned int) j_cdbs->prev_cpu_wall;
+
 			if (ignore_nice)
 				j_cdbs->prev_cpu_nice =
 					kcpustat_cpu(j).cpustat[CPUTIME_NICE];
@@ -332,6 +432,10 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 			cs_dbs_info->down_skip = 0;
 			cs_dbs_info->enable = 1;
 			cs_dbs_info->requested_freq = policy->cur;
+		} else if (dbs_data->cdata->governor == GOV_ZZMOOVE) {
+			zz_dbs_info->down_skip = 0;
+			zz_dbs_info->enable = 1;
+			zz_dbs_info->requested_freq = policy->cur;
 		} else {
 			od_dbs_info->rate_mult = 1;
 			od_dbs_info->sample_type = OD_NORMAL_SAMPLE;
@@ -351,6 +455,9 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 		if (dbs_data->cdata->governor == GOV_CONSERVATIVE)
 			cs_dbs_info->enable = 0;
 
+		if (dbs_data->cdata->governor == GOV_ZZMOOVE)
+			zz_dbs_info->enable = 0;
+
 		gov_cancel_work(dbs_data, policy);
 
 		mutex_lock(&dbs_data->mutex);
@@ -362,6 +469,11 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 		break;
 
 	case CPUFREQ_GOV_LIMITS:
+	mutex_lock(&dbs_data->mutex);
+		if (!cpu_cdbs->cur_policy) {
+			mutex_unlock(&dbs_data->mutex);
+			break;
+		}
 		mutex_lock(&cpu_cdbs->timer_mutex);
 		if (policy->max < cpu_cdbs->cur_policy->cur)
 			__cpufreq_driver_target(cpu_cdbs->cur_policy,
@@ -371,6 +483,7 @@ int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 					policy->min, CPUFREQ_RELATION_L);
 		dbs_check_cpu(dbs_data, cpu);
 		mutex_unlock(&cpu_cdbs->timer_mutex);
+		mutex_unlock(&dbs_data->mutex);
 		break;
 	}
 	return 0;

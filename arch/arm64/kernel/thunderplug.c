@@ -35,8 +35,8 @@
 #define MIN_CPU_LOAD_THRESHOLD       (10)
 
 #define HOTPLUG_ENABLED              (0)
-#define DEFAULT_HOTPLUG_STYLE         HOTPLUG_PERCORE
-#define DEFAULT_SCHED_MODE            TURBO
+#define DEFAULT_HOTPLUG_STYLE         HOTPLUG_SCHED
+#define DEFAULT_SCHED_MODE            POWER_SAVER
 
 #define DEF_SAMPLING_MS	             (500)
 #define MIN_SAMLING_MS               (50)
