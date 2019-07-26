@@ -21,7 +21,6 @@
 #include <linux/slab.h>
 
 #include "cpufreq_governor.h"
-
 static struct attribute_group *get_sysfs_attr(struct dbs_data *dbs_data)
 {
 	if (have_governor_per_policy())
@@ -176,10 +175,10 @@ void gov_queue_work(struct dbs_data *dbs_data, struct cpufreq_policy *policy,
 		unsigned int delay, bool all_cpus)
 {
 	int i;
-
+	DEFINE_MUTEX(cpufreq_governor_lock);
 	mutex_lock(&cpufreq_governor_lock);
 	if (!policy->governor_enabled)
-		goto out_unlock;
+		goto out;
 
 	if (!all_cpus) {
 		/*
@@ -194,10 +193,10 @@ void gov_queue_work(struct dbs_data *dbs_data, struct cpufreq_policy *policy,
 		for_each_cpu(i, policy->cpus)
 			__gov_queue_work(i, dbs_data, delay);
 	}
+	out:
+	mutex_unlock(&cpufreq_governor_lock);
 }
 
-out_unlock:
-	mutex_unlock(&cpufreq_governor_lock);
 
 EXPORT_SYMBOL_GPL(gov_queue_work);
 
