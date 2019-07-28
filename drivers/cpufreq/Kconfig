@@ -85,6 +85,11 @@ config CPU_FREQ_DEFAULT_GOV_USERSPACE
 	  you to set the CPU frequency manually or when a userspace 
 	  program shall be able to set the CPU dynamically without having
 	  to enable the userspace governor manually.
+	  
+config CPU_FREQ_DEFAULT_GOV_DARKNESS
+	bool "darkness"
+	select CPU_FREQ_GOV_DARKNESS
+	help
 config CPU_FREQ_DEFAULT_GOV_NIGHTMARE
 	bool "nightmare"
 	select CPU_FREQ_GOV_NIGHTMARE
