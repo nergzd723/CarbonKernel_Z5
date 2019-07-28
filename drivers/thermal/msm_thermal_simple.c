@@ -444,6 +444,7 @@ static int sysfs_zone_attr_init(struct thermal_policy *t)
 		t->zfs.dev_attr[i].attr.name = kstrdup(zone_name, GFP_KERNEL);
 		if (!t->zfs.dev_attr[i].attr.name)
 			goto free_name;
+		t->zfs.dev_attr[i].attr.mode = VERIFY_OCTAL_PERMISSIONS(0644);
 		t->zfs.dev_attr[i].show = thermal_zone_read;
 		t->zfs.dev_attr[i].store = thermal_zone_write;
 		t->zfs.attr[i] = &t->zfs.dev_attr[i].attr;
