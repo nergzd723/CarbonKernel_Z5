@@ -6,7 +6,6 @@
 #include <linux/static_key.h>
 #include <linux/context_tracking.h>
 #include "sched.h"
-#include "cpuacct.h"
 
 
 #ifdef CONFIG_IRQ_TIME_ACCOUNTING
