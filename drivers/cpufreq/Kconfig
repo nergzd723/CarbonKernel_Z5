@@ -124,6 +124,12 @@ config CPU_FREQ_DEFAULT_GOV_CONSERVATIVE
 	select CPU_FREQ_GOV_ALUCARD
 	help
 
+config CPU_FREQ_DEFAULT_GOV_SMARTMAX
+        bool "smartmax"
+        select CPU_FREQ_GOV_SMARTMAX
+        help
+          Use the CPUFreq governor 'smartmax' as default
+
 config CPU_FREQ_DEFAULT_GOV_INTERACTIVE
 	bool "interactive"
 	select CPU_FREQ_GOV_INTERACTIVE
@@ -240,6 +246,12 @@ config CPU_FREQ_GOV_ALUCARD
 	tristate "'alucard' cpufreq governor"
 	depends on CPU_FREQ
 	select CPU_FREQ_GOV_COMMON
+
+config CPU_FREQ_GOV_SMARTMAX
+        tristate "'smartmax' cpufreq policy governor"
+        select CPU_FREQ_TABLE
+        help
+          'smartmax' combined ondemand and smartass2
 
 config CPU_FREQ_GOV_CONSERVATIVE
 	tristate "'conservative' cpufreq governor"
