@@ -126,6 +126,7 @@ static void *get_cpu_dbs_info_s(int cpu)				\
  * cdbs: common dbs
  * od_*: On-demand governor
  * cs_*: Conservative governor
+ * ac_*: Alucard governor
  */
 
 /* Per cpu structures */
@@ -136,6 +137,7 @@ struct cpu_dbs_common_info {
 	u64 prev_cpu_nice;
 	struct cpufreq_policy *cur_policy;
 	struct delayed_work work;
+	unsigned int prev_load;
 	/*
 	 * percpu mutex that serializes governor limit change with gov_dbs_timer
 	 * invocation. We do not want gov_dbs_timer to run when user is changing
@@ -143,6 +145,15 @@ struct cpu_dbs_common_info {
 	 */
 	struct mutex timer_mutex;
 	ktime_t time_stamp;
+};
+
+struct ac_cpu_dbs_info_s {
+	struct cpu_dbs_common_info cdbs;
+	struct cpufreq_frequency_table *freq_table;
+	unsigned int up_rate:1;
+	unsigned int down_rate:1;
+	unsigned int min_index;
+	unsigned int max_index;
 };
 
 struct od_cpu_dbs_info_s {
@@ -156,6 +167,13 @@ struct od_cpu_dbs_info_s {
 };
 
 struct cs_cpu_dbs_info_s {
+	struct cpu_dbs_common_info cdbs;
+	unsigned int down_skip;
+	unsigned int requested_freq;
+	unsigned int enable:1;
+};
+
+struct zz_cpu_dbs_info_s {
 	struct cpu_dbs_common_info cdbs;
 	unsigned int down_skip;
 	unsigned int requested_freq;
@@ -183,12 +201,48 @@ struct cs_dbs_tuners {
 	unsigned int freq_step;
 };
 
+struct zz_dbs_tuners {
+	unsigned int ignore_nice_load;
+	unsigned int sampling_rate;
+	unsigned int sampling_down_factor;
+	unsigned int up_threshold;
+	unsigned int down_threshold;
+	unsigned int smooth_up;
+	unsigned int scaling_proportional;
+	unsigned int fast_scaling_up;
+	unsigned int fast_scaling_down;
+	unsigned int afs_threshold1;
+	unsigned int afs_threshold2;
+	unsigned int afs_threshold3;
+	unsigned int afs_threshold4;
+};
+struct ac_dbs_tuners {
+	unsigned int ignore_nice_load;
+	unsigned int sampling_rate;
+	int inc_cpu_load_at_min_freq;
+	int inc_cpu_load;
+	int dec_cpu_load_at_min_freq;
+	int dec_cpu_load;
+	int freq_responsiveness;
+	unsigned int cpus_up_rate;
+	unsigned int cpus_down_rate;
+	int pump_inc_step;
+	int pump_inc_step_at_min_freq;
+	int pump_dec_step;
+	int pump_dec_step_at_min_freq;
+};
+
+
+
+
 /* Common Governor data across policies */
 struct dbs_data;
 struct common_dbs_data {
 	/* Common across governors */
 	#define GOV_ONDEMAND		0
 	#define GOV_CONSERVATIVE	1
+	#define GOV_ZZMOOVE		3
+	#define GOV_ALUCARD		4
 	int governor;
 	struct attribute_group *attr_group_gov_sys; /* one governor - system */
 	struct attribute_group *attr_group_gov_pol; /* one governor - policy */
@@ -204,6 +258,7 @@ struct common_dbs_data {
 	void (*gov_dbs_timer)(struct work_struct *work);
 	void (*gov_check_cpu)(int cpu, unsigned int load);
 	int (*init)(struct dbs_data *dbs_data);
+	int (*init_zz)(struct dbs_data *dbs_data, struct cpufreq_policy *policy);
 	void (*exit)(struct dbs_data *dbs_data);
 
 	/* Governor specific ops, see below */
@@ -215,6 +270,18 @@ struct dbs_data {
 	struct common_dbs_data *cdata;
 	unsigned int min_sampling_rate;
 	int usage_count;
+	struct cpufreq_frequency_table *freq_table;
+	bool freq_table_desc;
+	unsigned int freq_table_size;
+	unsigned int pol_min;
+	unsigned int pol_max;
+	unsigned int min_scaling_freq;
+	unsigned int limit_table_start;
+	unsigned int limit_table_end;
+	unsigned int max_scaling_freq_hard;
+	unsigned int max_scaling_freq_soft;
+	unsigned int scaling_mode_up;
+	unsigned int scaling_mode_down;
 	void *tuners;
 
 	/* dbs_mutex protects dbs_enable in governor start/stop */
@@ -230,6 +297,16 @@ struct od_ops {
 };
 
 struct cs_ops {
+	struct notifier_block *notifier_block;
+};
+struct ac_ops {
+	void (*get_cpu_frequency_table)(int cpu);
+	void (*get_cpu_frequency_table_minmax)(struct cpufreq_policy *policy, 
+			int cpu);
+};
+
+struct zz_ops {
+	
 	struct notifier_block *notifier_block;
 };
 
@@ -258,7 +335,7 @@ static ssize_t show_sampling_rate_min_gov_pol				\
 	struct dbs_data *dbs_data = policy->governor_data;		\
 	return sprintf(buf, "%u\n", dbs_data->min_sampling_rate);	\
 }
-
+extern struct mutex cpufreq_governor_lock;
 void dbs_check_cpu(struct dbs_data *dbs_data, int cpu);
 bool need_load_eval(struct cpu_dbs_common_info *cdbs,
 		unsigned int sampling_rate);
