@@ -32,6 +32,7 @@
 #include <linux/init.h>
 #include <linux/ioport.h>
 #include <linux/kernel.h>
+#include "klapse.h"
 #include <linux/memory.h>
 #include <linux/mm.h>
 #include <linux/module.h>
@@ -793,6 +794,9 @@ static int mdss_fb_blanking_mode_switch(struct msm_fb_data_type *mfd, int mode)
 	mutex_lock(&mfd->bl_lock);
 	mfd->bl_updated = true;
 	mdss_fb_set_backlight(mfd, bl_lvl);
+#ifdef CONFIG_KLAPSE
+		set_rgb_slider(bl_lvl);
+#endif
 	mutex_unlock(&mfd->bl_lock);
 
 	pdata->panel_info.dynamic_switch_pending = false;
