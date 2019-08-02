@@ -12,7 +12,7 @@ extern void kcal_klapse_push(int r, int g, int b);
  * 1 = time-based scaling
  * 2 = brightness-based scaling
  */
-#define DEFAULT_ENABLE  0
+#define DEFAULT_ENABLE  1
 
 // MAX_SCALE : Maximum value of RGB possible
 #define MAX_SCALE       256
