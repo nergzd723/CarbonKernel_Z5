@@ -132,8 +132,9 @@ static uint32_t igc_Table_RGB[IGC_LUT_ENTRIES] = {
 	48, 32, 16, 0
 };
 
+#ifdef CONFIG_KLAPSE
 struct kcal_lut_data *lut_cpy;
-
+#endif
 
 struct mdss_mdp_ctl *fb0_ctl = 0;
 
@@ -527,7 +528,7 @@ static DEVICE_ATTR(kcal_val, S_IWUSR | S_IRUGO, kcal_val_show, kcal_val_store);
 static DEVICE_ATTR(kcal_cont, S_IWUSR | S_IRUGO, kcal_cont_show,
 	kcal_cont_store);
 
-
+#ifdef CONFIG_KLAPSE
 void kcal_klapse_push(int r, int g, int b)
 {
         lut_cpy->red = r;
@@ -536,6 +537,7 @@ void kcal_klapse_push(int r, int g, int b)
 
 	mdss_mdp_kcal_update_pcc(lut_cpy);
 }
+#endif
 
 static int kcal_ctrl_probe(struct platform_device *pdev)
 {
