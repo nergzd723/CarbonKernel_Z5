@@ -89,11 +89,4 @@ config KLAPSE
     ---help---
     A simple rgb dynamic lapsing module similar to LineageOS' livedisplay
 
-config FB_MSM_MDSS_KCAL_CTRL
-	depends on FB_MSM_MDSS
-	bool "MDSS color control"
-	---help---
-	  Enable sysfs for post-processing control of mdss-mdp5 display
-	  controllers in MDSS.
-
 source "drivers/video/msm/mdss/mhl_simg_sony/Kconfig"
