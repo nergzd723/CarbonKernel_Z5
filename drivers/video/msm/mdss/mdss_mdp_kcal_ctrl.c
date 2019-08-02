@@ -22,6 +22,7 @@
 #include <linux/init.h>
 #include <linux/module.h>
 #include "mdss_mdp.h"
+#include "klapse.h"
 
 #define DEF_PCC 0x100
 #define DEF_PA 0xff
