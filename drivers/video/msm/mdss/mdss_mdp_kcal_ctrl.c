@@ -529,7 +529,7 @@ static DEVICE_ATTR(kcal_cont, S_IWUSR | S_IRUGO, kcal_cont_show,
 	kcal_cont_store);
 
 
-void kcal_klapse_push(int r, int g, int b)
+static void kcal_klapse_push(int r, int g, int b)
 {
         lut_cpy->red = r;
 	lut_cpy->green = g;
