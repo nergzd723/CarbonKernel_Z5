@@ -82,11 +82,4 @@ config MHL_SIMG_SONY
 	uses USB connector to output HDMI content.
 	This driver is specific to Sony boards (Xperia).
 
-
-config KLAPSE
-    bool CONFIG_KLAPSE
-    default n
-    ---help---
-    A simple rgb dynamic lapsing module similar to LineageOS' livedisplay
-
 source "drivers/video/msm/mdss/mhl_simg_sony/Kconfig"
