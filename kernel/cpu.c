@@ -147,6 +147,7 @@ static void cpu_hotplug_done(void)
  * hotplug path before performing hotplug operations. So acquiring that lock
  * guarantees mutual exclusion from any currently running hotplug operations.
  */
+
 void cpu_hotplug_disable(void)
 {
 	cpu_maps_update_begin();
@@ -371,7 +372,7 @@ int __ref cpu_down(unsigned int cpu)
 	cpu_maps_update_begin();
 
 	// AP: Keep CPU cores 0 and 4 always on
-	if ((cpu == 0) || (cpu == 4))
+	if ((cpu == 0) || (cpu == 5))
 	{
 		err = -EBUSY;
 		goto out;
