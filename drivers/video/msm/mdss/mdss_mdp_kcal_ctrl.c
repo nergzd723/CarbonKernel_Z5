@@ -45,7 +45,6 @@ static int mdss_mdp_kcal_display_commit(void)
 	int i;
 	int ret = 0;
 	struct mdss_mdp_ctl *ctl;
-	struct kcal_lut_data *lut_cpy;
 	struct mdss_data_type *mdata = mdss_mdp_get_mdata();
 
 	for (i = 0; i < mdata->nctl; i++) {
@@ -61,7 +60,7 @@ static int mdss_mdp_kcal_display_commit(void)
 
 	return ret;
 }
-
+struct kcal_lut_data *lut_cpy;
 static void mdss_mdp_kcal_update_pcc(struct kcal_lut_data *lut_data)
 {
 	u32 copyback = 0;
