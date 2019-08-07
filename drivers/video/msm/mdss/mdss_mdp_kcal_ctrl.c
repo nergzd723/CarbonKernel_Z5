@@ -45,6 +45,7 @@ static int mdss_mdp_kcal_display_commit(void)
 	int i;
 	int ret = 0;
 	struct mdss_mdp_ctl *ctl;
+	struct kcal_lut_data *lut_cpy;
 	struct mdss_data_type *mdata = mdss_mdp_get_mdata();
 
 	for (i = 0; i < mdata->nctl; i++) {
@@ -390,6 +391,13 @@ static DEVICE_ATTR(kcal_val, S_IWUSR | S_IRUGO, kcal_val_show, kcal_val_store);
 static DEVICE_ATTR(kcal_cont, S_IWUSR | S_IRUGO, kcal_cont_show,
 	kcal_cont_store);
 
+void kcal_klapse_push(int r, int g, int b)
+{
+        lut_cpy->red = r;
+	lut_cpy->green = g;
+	lut_cpy->blue = b;
+	mdss_mdp_kcal_update_pcc(lut_cpy);
+}
 static int kcal_ctrl_probe(struct platform_device *pdev)
 {
 	int ret;
@@ -418,7 +426,7 @@ static int kcal_ctrl_probe(struct platform_device *pdev)
 	mdss_mdp_kcal_update_pcc(lut_data);
 	mdss_mdp_kcal_update_pa(lut_data);
 	mdss_mdp_kcal_display_commit();
-
+	lut_cpy = lut_data;
 	ret = device_create_file(&pdev->dev, &dev_attr_kcal);
 	ret |= device_create_file(&pdev->dev, &dev_attr_kcal_min);
 	ret |= device_create_file(&pdev->dev, &dev_attr_kcal_enable);
