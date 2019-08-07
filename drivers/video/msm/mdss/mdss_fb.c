@@ -795,7 +795,7 @@ static int mdss_fb_blanking_mode_switch(struct msm_fb_data_type *mfd, int mode)
 	mfd->bl_updated = true;
 	mdss_fb_set_backlight(mfd, bl_lvl);
 #ifdef CONFIG_KLAPSE
-		set_rgb_slider(bl_lvl);
+	set_rgb_slider(bl_lvl);
 #endif
 	mutex_unlock(&mfd->bl_lock);
 
