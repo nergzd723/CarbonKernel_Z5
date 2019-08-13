@@ -53,12 +53,6 @@
 #define BINDER_MIN_ALLOC (1 * PAGE_SIZE)
 
 static HLIST_HEAD(binder_devices);
-<<<<<<< HEAD
-=======
-static HLIST_HEAD(binder_procs);
-static HLIST_HEAD(binder_deferred_list);
-static HLIST_HEAD(binder_dead_nodes);
->>>>>>> d73c2d2e0b4... android: binder: support multiple /dev instances.
 
 static struct dentry *binder_debugfs_dir_entry_root;
 static struct dentry *binder_debugfs_dir_entry_proc;
@@ -3641,20 +3635,12 @@ static int binder_open(struct inode *nodp, struct file *filp)
 	proc = kzalloc(sizeof(*proc), GFP_KERNEL);
 	if (proc == NULL)
 		return -ENOMEM;
-<<<<<<< HEAD
 	get_task_struct(current->group_leader);
 	proc->tsk = current->group_leader;
 	INIT_LIST_HEAD(&proc->todo);
 	init_waitqueue_head(&proc->wait);
 	proc->default_priority = task_nice(current);
 	INIT_LIST_HEAD(&proc->buffers);
-=======
-	get_task_struct(current);
-	proc->tsk = current;
-	INIT_LIST_HEAD(&proc->todo);
-	init_waitqueue_head(&proc->wait);
-	proc->default_priority = task_nice(current);
->>>>>>> d73c2d2e0b4... android: binder: support multiple /dev instances.
 	binder_dev = container_of(filp->private_data, struct binder_device,
 				  miscdev);
 	proc->context = &binder_dev->context;
@@ -4479,7 +4465,6 @@ BINDER_DEBUG_ENTRY(transactions);
 BINDER_DEBUG_ENTRY(transaction_log);
 BINDER_DEBUG_ENTRY(failed_transaction_log);
 
-<<<<<<< HEAD
 static void __init free_binder_device(struct binder_device *device)
 {
 	if (device->context.binder_deferred_workqueue)
@@ -4492,41 +4477,6 @@ static int __init init_binder_device(const char *name)
 	int ret;
 	struct binder_device *binder_device;
 	struct binder_context *context;
-=======
-static int __init init_binder_device(const char *name)
-{
-	int ret;
-	struct binder_device *binder_device;
-
-	binder_device = kzalloc(sizeof(*binder_device), GFP_KERNEL);
-	if (!binder_device)
-		return -ENOMEM;
-
-	binder_device->miscdev.fops = &binder_fops;
-	binder_device->miscdev.minor = MISC_DYNAMIC_MINOR;
-	binder_device->miscdev.name = name;
-
-	binder_device->context.binder_context_mgr_uid = INVALID_UID;
-	binder_device->context.name = name;
-
-	ret = misc_register(&binder_device->miscdev);
-	if (ret < 0) {
-		kfree(binder_device);
-		return ret;
-	}
-
-	hlist_add_head(&binder_device->hlist, &binder_devices);
-
-	return ret;
-}
-
-static int __init binder_init(void)
-{
-	int ret;
-	char *device_name, *device_names;
-	struct binder_device *device;
-	struct hlist_node *tmp;
->>>>>>> d73c2d2e0b4... android: binder: support multiple /dev instances.
 
 	binder_device = kzalloc(sizeof(*binder_device), GFP_KERNEL);
 	if (!binder_device)
@@ -4628,43 +4578,14 @@ static int __init binder_init(void)
 				    &binder_failed_transaction_log_fops);
 	}
 
-<<<<<<< HEAD
-=======
-	/*
-	 * Copy the module_parameter string, because we don't want to
-	 * tokenize it in-place.
-	 */
-	device_names = kzalloc(strlen(binder_devices_param) + 1, GFP_KERNEL);
-	if (!device_names) {
-		ret = -ENOMEM;
-		goto err_alloc_device_names_failed;
-	}
-	strcpy(device_names, binder_devices_param);
-
-	while ((device_name = strsep(&device_names, ","))) {
-		ret = init_binder_device(device_name);
-		if (ret)
-			goto err_init_binder_device_failed;
-	}
-
->>>>>>> d73c2d2e0b4... android: binder: support multiple /dev instances.
 	return ret;
 
 err_init_binder_device_failed:
 	hlist_for_each_entry_safe(device, tmp, &binder_devices, hlist) {
 		misc_deregister(&device->miscdev);
 		hlist_del(&device->hlist);
-<<<<<<< HEAD
 		free_binder_device(device);
 	}
-=======
-		kfree(device);
-	}
-err_alloc_device_names_failed:
-	debugfs_remove_recursive(binder_debugfs_dir_entry_root);
-
-	destroy_workqueue(binder_deferred_workqueue);
->>>>>>> d73c2d2e0b4... android: binder: support multiple /dev instances.
 
 	return ret;
 }
