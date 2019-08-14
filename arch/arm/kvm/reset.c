@@ -31,6 +31,9 @@
  * Cortex-A15 Reset Values
  */
 
+static inline void kvm_timer_vcpu_reset(struct kvm_vcpu *vcpu,
+					const struct kvm_irq_level *irq) {}
+
 static const int a15_max_cpu_idx = 3;
 
 static struct kvm_regs a15_regs_reset = {
