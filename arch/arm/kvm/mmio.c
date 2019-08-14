@@ -22,7 +22,10 @@
 #include <trace/events/kvm.h>
 
 #include "trace.h"
-
+static inline bool kvm_vcpu_reg_is_pc(struct kvm_vcpu *vcpu, int reg)
+{
+	return reg == 15;
+}
 static void mmio_write_buf(char *buf, unsigned int len, unsigned long data)
 {
 	void *datap = NULL;
