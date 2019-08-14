@@ -992,7 +992,7 @@ out_free_stack_pages:
 	for_each_possible_cpu(cpu)
 		free_page(per_cpu(kvm_arm_hyp_stack_page, cpu));
 out_err:
-	kvm_err("error initializing Hyp mode: %d\n", err);
+	kvm_info("error initializing Hyp mode: %d\n", err);
 	return err;
 }
 
@@ -1010,7 +1010,7 @@ int kvm_arch_init(void *opaque)
 	int ret, cpu;
 
 	if (!is_hyp_mode_available()) {
-		kvm_err("HYP mode not available\n");
+		kvm_info("HYP mode not available\n");
 		return -ENODEV;
 	}
 
