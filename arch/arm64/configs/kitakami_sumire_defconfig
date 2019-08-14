@@ -685,6 +685,8 @@ CONFIG_FB_MSM_MDSS_KCAL_CTRL=y
 # Klapse - Linear RGB scaling
 CONFIG_KLAPSE=y
 # Add KVM to kernel. Theoretically could virtualize sone arm64 linux guest systems with QEMU
-CONFIG_HAVE_KVM=y
+CONFIG_KVM_ARM_HOST=y
+CONFIG_KVM_ARM_VGIC=y
+CONFIG_KVM_ARM_TIMER=y
 CONFIG_VIRTUALIZATION=y
 CONFIG_KVM=y
