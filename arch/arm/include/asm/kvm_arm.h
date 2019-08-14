@@ -15,8 +15,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
-#ifndef __ARM_KVM_ARM_H__
 #define __ARM_KVM_ARM_H__
 
 #include <linux/types.h>
@@ -214,5 +212,4 @@
 #define HSR_DABT_S1PTW		(1U << 7)
 #define HSR_DABT_CM		(1U << 8)
 #define HSR_DABT_EA		(1U << 9)
-
-#endif /* __ARM_KVM_ARM_H__ */
+ /* __ARM_KVM_ARM_H__ */
