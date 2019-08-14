@@ -30,6 +30,10 @@
 #include <asm/kvm_arm.h>
 #include <asm/kvm_coproc.h>
 
+static inline void kvm_timer_vcpu_reset(struct kvm_vcpu *vcpu,
+					const struct kvm_irq_level *irq)
+{
+}
 /*
  * ARMv8 Reset Values
  */
