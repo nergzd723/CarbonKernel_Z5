@@ -1336,14 +1336,6 @@ static void binder_transaction_buffer_release(struct binder_proc *proc,
 		    buffer->data_size < sizeof(*fp) ||
 		    !IS_ALIGNED(*offp, sizeof(u32))) {
 			pr_err("transaction release %d bad offset %lld, size %zd\n",
-<<<<<<< HEAD
-		struct binder_object_header *hdr;
-		size_t object_size = binder_validate_object(buffer, *offp);
-
-		if (object_size == 0) {
-			pr_err("transaction release %d bad object at offset %lld, size %zd\n",
-=======
->>>>>>> parent of eb3e87a4fc3... android: binder: split flat_binder_object.
 			       debug_id, (u64)*offp, buffer->data_size);
 			continue;
 		}
@@ -1352,15 +1344,7 @@ static void binder_transaction_buffer_release(struct binder_proc *proc,
 		case BINDER_TYPE_BINDER:
 		case BINDER_TYPE_WEAK_BINDER: {
 			struct binder_node *node = binder_get_node(proc, fp->binder);
-<<<<<<< HEAD
-			struct flat_binder_object *fp;
-			struct binder_node *node;
 
-			fp = to_flat_binder_object(hdr);
-			node = binder_get_node(proc, fp->binder);
-=======
-
->>>>>>> parent of eb3e87a4fc3... android: binder: split flat_binder_object.
 			if (node == NULL) {
 				pr_err("transaction release %d bad node %016llx\n",
 				       debug_id, (u64)fp->binder);
@@ -1615,14 +1599,6 @@ static void binder_transaction(struct binder_proc *proc,
 		    t->buffer->data_size < sizeof(*fp) ||
 		    !IS_ALIGNED(*offp, sizeof(u32))) {
 			binder_user_error("%d:%d got transaction with invalid offset, %lld (min %lld, max %lld)\n",
-<<<<<<< HEAD
-		struct binder_object_header *hdr;
-		size_t object_size = binder_validate_object(t->buffer, *offp);
-
-		if (object_size == 0 || *offp < off_min) {
-			binder_user_error("%d:%d got transaction with invalid offset (%lld, min %lld max %lld) or object.\n",
-=======
->>>>>>> parent of eb3e87a4fc3... android: binder: split flat_binder_object.
 					  proc->pid, thread->pid, (u64)*offp,
 					  (u64)off_min,
 					  (u64)(t->buffer->data_size -
@@ -1637,12 +1613,7 @@ static void binder_transaction(struct binder_proc *proc,
 		case BINDER_TYPE_WEAK_BINDER: {
 			struct binder_ref *ref;
 			struct binder_node *node = binder_get_node(proc, fp->binder);
-<<<<<<< HEAD
-			fp = to_flat_binder_object(hdr);
-			node = binder_get_node(proc, fp->binder);
-=======
 
->>>>>>> parent of eb3e87a4fc3... android: binder: split flat_binder_object.
 			if (node == NULL) {
 				node = binder_new_node(proc, fp->binder, fp->cookie);
 				if (node == NULL) {
