@@ -308,7 +308,6 @@ enum binder_deferred_state {
 };
 
 struct binder_proc {
-	struct context;
 	struct hlist_node proc_node;
 	struct rb_root threads;
 	struct rb_root nodes;
