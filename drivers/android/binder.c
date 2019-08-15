@@ -3,7 +3,6 @@
  * Android IPC Subsystem
  *
  * Copyright (C) 2007-2008 Google, Inc.
- *
  * This software is licensed under the terms of the GNU General Public
  * License version 2, as published by the Free Software Foundation, and
  * may be copied, distributed, and modified under those terms.
@@ -215,7 +214,6 @@ static struct binder_transaction_log_entry *binder_transaction_log_add(
 struct binder_context {
 	struct binder_node *binder_context_mgr_node;
 	kuid_t binder_context_mgr_uid;
-<<<<<<< HEAD:drivers/android/binder.c
 	const char *name;
 };
 
@@ -223,12 +221,10 @@ struct binder_device {
 	struct hlist_node hlist;
 	struct miscdevice miscdev;
 	struct binder_context context;
-=======
 };
 
 static struct binder_context global_context = {
 	.binder_context_mgr_uid = INVALID_UID,
->>>>>>> 33825c606ee... android: binder: support multiple context managers.:drivers/staging/android/binder.c
 };
 
 struct binder_work {
@@ -2866,11 +2862,10 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		}
 		break;
 	case BINDER_SET_CONTEXT_MGR:
-<<<<<<< HEAD:drivers/android/binder.c
+
 		ret = binder_ioctl_set_ctx_mgr(filp);
 		if (ret)
 			goto err;
-=======
 		if (context->binder_context_mgr_node) {
 			pr_err("BINDER_SET_CONTEXT_MGR already set\n");
 			ret = -EBUSY;
@@ -2900,7 +2895,6 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		context->binder_context_mgr_node->local_strong_refs++;
 		context->binder_context_mgr_node->has_strong_ref = 1;
 		context->binder_context_mgr_node->has_weak_ref = 1;
->>>>>>> 33825c606ee... android: binder: support multiple context managers.:drivers/staging/android/binder.c
 		break;
 	case BINDER_THREAD_EXIT:
 		binder_debug(BINDER_DEBUG_THREADS, "%d:%d exit\n",
