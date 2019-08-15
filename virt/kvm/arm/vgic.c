@@ -1316,11 +1316,6 @@ int kvm_vgic_hyp_init(void)
 
 	vgic_node = of_find_compatible_node(NULL, NULL, "arm,cortex-a15-gic");
 	vgic_maint_irq = irq_of_parse_and_map(vgic_node, 0);
-	if (!vgic_maint_irq) {
-		kvm_err("error getting vgic maintenance irq from DT\n");
-		ret = -ENXIO;
-		goto out;
-	}
 
 	ret = request_percpu_irq(vgic_maint_irq, vgic_maintenance_handler,
 				 "vgic", kvm_get_running_vcpus());
