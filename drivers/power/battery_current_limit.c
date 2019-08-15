@@ -254,20 +254,16 @@ static void __ref bcl_handle_hotplug(struct work_struct *work)
 			if (!cpu_online(_cpu))
 				continue;
 			ret = cpu_down(_cpu);
-			if (ret)
-				pr_err("Error %d offlining core %d\n",
-					ret, _cpu);
-			else
-				pr_info("Set Offline CPU:%d\n", _cpu);
+			if (!ret)
+				pr_info("Core %d offlined \n",
+					 _cpu);
 		} else {
 			if (cpu_online(_cpu))
 				continue;
 			ret = cpu_up(_cpu);
-			if (ret)
-				pr_err("Error %d onlining core %d\n",
-					ret, _cpu);
-			else
-				pr_info("Allow Online CPU:%d\n", _cpu);
+			if (!ret)
+				pr_info("Core %d offlined \n",
+					 _cpu);
 		}
 	}
 
