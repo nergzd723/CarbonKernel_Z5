@@ -221,15 +221,12 @@ struct binder_context {
 	struct binder_node *binder_context_mgr_node;
 	kuid_t binder_context_mgr_uid;
 	const char *name;
-<<<<<<< HEAD:drivers/android/binder.c
 };
 
 struct binder_device {
 	struct hlist_node hlist;
 	struct miscdevice miscdev;
 	struct binder_context context;
-=======
->>>>>>> 63f1ef9d073... android: binder: deal with contexts in debugfs.:drivers/staging/android/binder.c
 };
 
 static struct binder_context global_context = {
@@ -1403,20 +1400,17 @@ static void binder_transaction_buffer_release(struct binder_proc *proc,
 	else
 		off_end = (void *)offp + buffer->offsets_size;
 	for (; offp < off_end; offp++) {
-<<<<<<< HEAD:drivers/android/binder.c
 		struct flat_binder_object *fp;
 
 		if (*offp > buffer->data_size - sizeof(*fp) ||
 		    buffer->data_size < sizeof(*fp) ||
 		    !IS_ALIGNED(*offp, sizeof(u32))) {
 			pr_err("transaction release %d bad offset %lld, size %zd\n",
-=======
 		struct binder_object_header *hdr;
 		size_t object_size = binder_validate_object(buffer, *offp);
 
 		if (object_size == 0) {
 			pr_err("transaction release %d bad object at offset %lld, size %zd\n",
->>>>>>> 39cb2e90399... android: binder: split flat_binder_object.:drivers/staging/android/binder.c
 			       debug_id, (u64)*offp, buffer->data_size);
 			continue;
 		}
@@ -1424,16 +1418,12 @@ static void binder_transaction_buffer_release(struct binder_proc *proc,
 		switch (hdr->type) {
 		case BINDER_TYPE_BINDER:
 		case BINDER_TYPE_WEAK_BINDER: {
-<<<<<<< HEAD:drivers/android/binder.c
 			struct binder_node *node = binder_get_node(proc, fp->binder);
-
-=======
 			struct flat_binder_object *fp;
 			struct binder_node *node;
 
 			fp = to_flat_binder_object(hdr);
 			node = binder_get_node(proc, fp->binder);
->>>>>>> 39cb2e90399... android: binder: split flat_binder_object.:drivers/staging/android/binder.c
 			if (node == NULL) {
 				pr_err("transaction release %d bad node %016llx\n",
 				       debug_id, (u64)fp->binder);
@@ -1689,7 +1679,6 @@ static void binder_transaction(struct binder_proc *proc,
 	off_end = (void *)offp + tr->offsets_size;
 	off_min = 0;
 	for (; offp < off_end; offp++) {
-<<<<<<< HEAD:drivers/android/binder.c
 		struct flat_binder_object *fp;
 
 		if (*offp > t->buffer->data_size - sizeof(*fp) ||
@@ -1697,13 +1686,11 @@ static void binder_transaction(struct binder_proc *proc,
 		    t->buffer->data_size < sizeof(*fp) ||
 		    !IS_ALIGNED(*offp, sizeof(u32))) {
 			binder_user_error("%d:%d got transaction with invalid offset, %lld (min %lld, max %lld)\n",
-=======
 		struct binder_object_header *hdr;
 		size_t object_size = binder_validate_object(t->buffer, *offp);
 
 		if (object_size == 0 || *offp < off_min) {
 			binder_user_error("%d:%d got transaction with invalid offset (%lld, min %lld max %lld) or object.\n",
->>>>>>> 39cb2e90399... android: binder: split flat_binder_object.:drivers/staging/android/binder.c
 					  proc->pid, thread->pid, (u64)*offp,
 					  (u64)off_min,
 					  (u64)t->buffer->data_size);
@@ -1719,14 +1706,9 @@ static void binder_transaction(struct binder_proc *proc,
 			struct flat_binder_object *fp;
 			struct binder_node *node;
 			struct binder_ref *ref;
-<<<<<<< HEAD:drivers/android/binder.c
 			struct binder_node *node = binder_get_node(proc, fp->binder);
-
-=======
-
 			fp = to_flat_binder_object(hdr);
 			node = binder_get_node(proc, fp->binder);
->>>>>>> 39cb2e90399... android: binder: split flat_binder_object.:drivers/staging/android/binder.c
 			if (node == NULL) {
 				node = binder_new_node(proc, fp->binder, fp->cookie);
 				if (node == NULL) {
