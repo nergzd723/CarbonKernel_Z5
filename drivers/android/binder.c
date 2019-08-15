@@ -56,6 +56,8 @@ static HLIST_HEAD(binder_dead_nodes);
 
 static struct dentry *binder_debugfs_dir_entry_root;
 static struct dentry *binder_debugfs_dir_entry_proc;
+static struct binder_node *binder_context_mgr_node;
+static kuid_t binder_context_mgr_uid = INVALID_UID;
 static int binder_last_id;
 static struct workqueue_struct *binder_deferred_workqueue;
 
@@ -215,7 +217,6 @@ static struct binder_transaction_log_entry *binder_transaction_log_add(
 struct binder_context {
 	struct binder_node *binder_context_mgr_node;
 	kuid_t binder_context_mgr_uid;
-<<<<<<< HEAD:drivers/android/binder.c
 	const char *name;
 };
 
@@ -223,12 +224,6 @@ struct binder_device {
 	struct hlist_node hlist;
 	struct miscdevice miscdev;
 	struct binder_context context;
-=======
-};
-
-static struct binder_context global_context = {
-	.binder_context_mgr_uid = INVALID_UID,
->>>>>>> 33825c606ee... android: binder: support multiple context managers.:drivers/staging/android/binder.c
 };
 
 struct binder_work {
@@ -347,7 +342,6 @@ struct binder_proc {
 	int ready_threads;
 	long default_priority;
 	struct dentry *debugfs_entry;
-	struct binder_context *context;
 };
 
 enum {
@@ -1017,10 +1011,8 @@ static int binder_inc_node(struct binder_node *node, int strong, int internal,
 		if (internal) {
 			if (target_list == NULL &&
 			    node->internal_strong_refs == 0 &&
-			    !(node->proc &&
-			      node == node->proc->context->
-				      binder_context_mgr_node &&
-			      node->has_strong_ref)) {
+			    !(node == binder_context_mgr_node &&
+			    node->has_strong_ref)) {
 				pr_err("invalid inc strong node for %d\n",
 					node->debug_id);
 				return -EINVAL;
@@ -1121,7 +1113,6 @@ static struct binder_ref *binder_get_ref_for_node(struct binder_proc *proc,
 	struct rb_node **p = &proc->refs_by_node.rb_node;
 	struct rb_node *parent = NULL;
 	struct binder_ref *ref, *new_ref;
-	struct binder_context *context = proc->context;
 
 	while (*p) {
 		parent = *p;
@@ -1144,7 +1135,7 @@ static struct binder_ref *binder_get_ref_for_node(struct binder_proc *proc,
 	rb_link_node(&new_ref->rb_node_node, parent, p);
 	rb_insert_color(&new_ref->rb_node_node, &proc->refs_by_node);
 
-	new_ref->desc = (node == context->binder_context_mgr_node) ? 0 : 1;
+	new_ref->desc = (node == binder_context_mgr_node) ? 0 : 1;
 	for (n = rb_first(&proc->refs_by_desc); n != NULL; n = rb_next(n)) {
 		ref = rb_entry(n, struct binder_ref, rb_node_desc);
 		if (ref->desc > new_ref->desc)
@@ -1444,7 +1435,6 @@ static void binder_transaction(struct binder_proc *proc,
 	struct binder_transaction *in_reply_to = NULL;
 	struct binder_transaction_log_entry *e;
 	uint32_t return_error;
-	struct binder_context *context = proc->context;
 
 	e = binder_transaction_log_add(&binder_transaction_log);
 	e->call_type = reply ? 2 : !!(tr->flags & TF_ONE_WAY);
@@ -1505,7 +1495,7 @@ static void binder_transaction(struct binder_proc *proc,
 			}
 			target_node = ref->node;
 		} else {
-			target_node = context->binder_context_mgr_node;
+			target_node = binder_context_mgr_node;
 			if (target_node == NULL) {
 				return_error = BR_DEAD_REPLY;
 				goto err_no_context_mgr_node;
@@ -1883,7 +1873,6 @@ int binder_thread_write(struct binder_proc *proc,
 			binder_size_t *consumed)
 {
 	uint32_t cmd;
-	struct binder_context *context = proc->context;
 	void __user *buffer = (void __user *)(uintptr_t)binder_buffer;
 	void __user *ptr = buffer + *consumed;
 	void __user *end = buffer + size;
@@ -1910,10 +1899,10 @@ int binder_thread_write(struct binder_proc *proc,
 			if (get_user_preempt_disabled(target, (uint32_t __user *)ptr))
 				return -EFAULT;
 			ptr += sizeof(uint32_t);
-			if (target == 0 && context->binder_context_mgr_node &&
+			if (target == 0 && binder_context_mgr_node &&
 			    (cmd == BC_INCREFS || cmd == BC_ACQUIRE)) {
 				ref = binder_get_ref_for_node(proc,
-					context->binder_context_mgr_node);
+					       binder_context_mgr_node);
 				if (ref->desc != target) {
 					binder_user_error("%d:%d tried to acquire reference to desc 0, got %d instead\n",
 						proc->pid, thread->pid,
@@ -2861,7 +2850,6 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	int ret;
 	struct binder_proc *proc = filp->private_data;
-	struct binder_context *context = proc->context;
 	struct binder_thread *thread;
 	unsigned int size = _IOC_SIZE(cmd);
 	void __user *ubuf = (void __user *)arg;
@@ -2895,41 +2883,9 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		}
 		break;
 	case BINDER_SET_CONTEXT_MGR:
-<<<<<<< HEAD:drivers/android/binder.c
 		ret = binder_ioctl_set_ctx_mgr(filp);
 		if (ret)
 			goto err;
-=======
-		if (context->binder_context_mgr_node) {
-			pr_err("BINDER_SET_CONTEXT_MGR already set\n");
-			ret = -EBUSY;
-			goto err;
-		}
-		ret = security_binder_set_context_mgr(proc->tsk);
-		if (ret < 0)
-			goto err;
-		if (uid_valid(context->binder_context_mgr_uid)) {
-			if (!uid_eq(context->binder_context_mgr_uid,
-				    current->cred->euid)) {
-				pr_err("BINDER_SET_CONTEXT_MGR bad uid %d != %d\n",
-				       from_kuid(&init_user_ns, current->cred->euid),
-				       from_kuid(&init_user_ns,
-						 context->binder_context_mgr_uid));
-				ret = -EPERM;
-				goto err;
-			}
-		} else
-			context->binder_context_mgr_uid = current->cred->euid;
-		context->binder_context_mgr_node = binder_new_node(proc, 0, 0);
-		if (!context->binder_context_mgr_node) {
-			ret = -ENOMEM;
-			goto err;
-		}
-		context->binder_context_mgr_node->local_weak_refs++;
-		context->binder_context_mgr_node->local_strong_refs++;
-		context->binder_context_mgr_node->has_strong_ref = 1;
-		context->binder_context_mgr_node->has_weak_ref = 1;
->>>>>>> 33825c606ee... android: binder: support multiple context managers.:drivers/staging/android/binder.c
 		break;
 	case BINDER_THREAD_EXIT:
 		binder_debug(BINDER_DEBUG_THREADS, "%d:%d exit\n",
@@ -3120,7 +3076,6 @@ static int binder_open(struct inode *nodp, struct file *filp)
 		return -ENOMEM;
 	get_task_struct(current);
 	proc->tsk = current;
-	proc->context = &global_context;
 	INIT_LIST_HEAD(&proc->todo);
 	init_waitqueue_head(&proc->wait);
 	proc->default_priority = task_nice(current);
@@ -3236,7 +3191,6 @@ static int binder_node_release(struct binder_node *node, int refs)
 static void binder_deferred_release(struct binder_proc *proc)
 {
 	struct binder_transaction *t;
-	struct binder_context *context = proc->context;
 	struct rb_node *n;
 	int threads, nodes, incoming_refs, outgoing_refs, buffers,
 		active_transactions, page_count;
@@ -3246,12 +3200,11 @@ static void binder_deferred_release(struct binder_proc *proc)
 
 	hlist_del(&proc->proc_node);
 
-	if (context->binder_context_mgr_node &&
-	    context->binder_context_mgr_node->proc == proc) {
+	if (binder_context_mgr_node && binder_context_mgr_node->proc == proc) {
 		binder_debug(BINDER_DEBUG_DEAD_BINDER,
 			     "%s: %d context_mgr_node gone\n",
 			     __func__, proc->pid);
-		context->binder_context_mgr_node = NULL;
+		binder_context_mgr_node = NULL;
 	}
 
 	threads = 0;
