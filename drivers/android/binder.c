@@ -214,8 +214,6 @@ static struct binder_transaction_log_entry *binder_transaction_log_add(
 	return e;
 }
 
-<<<<<<< HEAD:drivers/android/binder.c
-=======
 struct binder_context {
 	struct binder_node *binder_context_mgr_node;
 	kuid_t binder_context_mgr_uid;
@@ -228,7 +226,6 @@ struct binder_device {
 	struct binder_context context;
 };
 
->>>>>>> 4fac951a5dc... android: binder: support multiple /dev instances.:drivers/staging/android/binder.c
 struct binder_work {
 	struct list_head entry;
 	enum {
