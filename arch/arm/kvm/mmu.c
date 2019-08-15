@@ -28,7 +28,7 @@
 #include <asm/kvm_mmio.h>
 #include <asm/kvm_asm.h>
 #include <asm/kvm_emulate.h>
-#include "kvm_hdr.h"
+
 
 #include "trace.h"
 
