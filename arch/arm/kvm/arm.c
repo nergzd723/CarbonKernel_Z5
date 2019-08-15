@@ -993,7 +993,7 @@ out_free_stack_pages:
 		free_page(per_cpu(kvm_arm_hyp_stack_page, cpu));
 out_err:
 	kvm_info("error initializing Hyp mode: %d\n", err);
-	return err;
+	return 0;
 }
 
 static void check_kvm_target_cpu(void *ret)
