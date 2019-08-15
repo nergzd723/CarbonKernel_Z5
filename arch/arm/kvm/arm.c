@@ -1009,11 +1009,6 @@ int kvm_arch_init(void *opaque)
 	int err;
 	int ret, cpu;
 
-	if (!is_hyp_mode_available()) {
-		kvm_info("HYP mode not available\n");
-		return -ENODEV;
-	}
-
 	for_each_online_cpu(cpu) {
 		smp_call_function_single(cpu, check_kvm_target_cpu, &ret, 1);
 		if (ret < 0) {
