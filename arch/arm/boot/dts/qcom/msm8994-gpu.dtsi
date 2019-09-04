@@ -121,7 +121,7 @@
 
 			qcom,gpu-pwrlevel@0 {
 				reg = <0>;
-				qcom,gpu-freq = <675000000>;
+				qcom,gpu-freq = <630000000>;
 				qcom,bus-freq = <8>;
 				qcom,bus-min = <7>;
 				qcom,bus-max = <8>;
@@ -158,6 +158,13 @@
 				qcom,bus-max = <0>;
 				qcom,bus-freq = <0>;
 			};
+			qcom,gpu-pwrlevel@5 {
+				reg = <5>;
+				qcom,gpu-freq = <700000000>;
+				qcom,bus-freq = <8>;
+				qcom,bus-min = <7>;
+				qcom,bus-max = <8>;
+			};
 		};
 
 		/*
@@ -176,6 +183,7 @@
 				<89 662 0 4800000>,     /* gpu=300 */
 				<89 662 0 2400000>,     /* gpu=150 */
                                 <89 662 0 0>;
+				<89 662 0 9600000>,
                 };
 	};
 };
