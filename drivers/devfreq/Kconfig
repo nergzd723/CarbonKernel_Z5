@@ -47,6 +47,11 @@ config ADRENO_IDLER
 	  wasted power coming from stock Adreno TZ while
 	  maintaining high-performance.
 
+config ADRENO_RAMPER
+	tristate "MSM Adreno ramper"
+	depends on DEVFREQ_GOV_MSM_ADRENO_TZ
+	help
+	  Ramps the frequency while demanding work happens
 
 
 config DEVFREQ_GOV_PERFORMANCE
