@@ -57,7 +57,7 @@ int adreno_ramper(struct devfreq_dev_status stats, struct devfreq *devfreq,
 	if (!adreno_ramper_active)
 		return 0;
 
-	if (stats.busy_time < nonidleworkload) {
+	if (stats.busy_time >= nonidleworkload) {
 
 		/* busy_time >= idleworkload should be considered as a non-idle workload. */
 
