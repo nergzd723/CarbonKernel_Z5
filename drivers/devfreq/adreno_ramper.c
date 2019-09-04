@@ -70,15 +70,16 @@ int adreno_ramper(struct devfreq_dev_status stats, struct devfreq *devfreq,
 			return 1;
 		}
 		if (idlecount >= rampwait &&
-		    stats.busy_time * 100 < stats.total_time * downdifferential) {}
+		    stats.busy_time * 100 < stats.total_time * downdifferential) {
 			/* We are idle for (idlewait + 1)'th time! Ramp down the frequency now. */
 			*freq = devfreq->profile->freq_table[devfreq->profile->max_state - 1];
-            		printk(KERN_DEBUG "Got ramped!\n");
+            		printk("Got ramped!\n");
 			idlecount--;
-
 			return 1;
 		}
-	} else {
+	}
+} 
+	else {
 		idlecount = 0;
 		/* Do not return 1 here and allow rest of the algorithm to
 		   figure out the appropriate frequency for current workload.
@@ -93,7 +94,7 @@ static int __init adreno_ramper_init(void)
 	pr_info("adreno_ramper: version %d.%d by nergzd723\n",
 		 ADRENO_RAMPER_MAJOR_VERSION,
 		 ADRENO_RAMPER_MINOR_VERSION);
-    printk(KERN_DEBUG "Init!\n");
+    	printk("Init!\n");
 	return 0;
 }
 subsys_initcall(adreno_ramper_init);
