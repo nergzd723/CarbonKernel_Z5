@@ -52,6 +52,7 @@ int adreno_ramper(struct devfreq_dev_status stats, struct devfreq *devfreq,
 			/* We are idle for (idlewait + 1)'th time! Ramp down the frequency now. */
 			*freq = devfreq->profile->freq_table[devfreq->profile->max_state - 1];
             		printk("Got ramped!\n");
+			printk(freq*);
 			idlecount--;
 			return 1;
 		}
