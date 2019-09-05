@@ -24,49 +24,27 @@
 #define ADRENO_RAMPER_MAJOR_VERSION 0
 #define ADRENO_RAMPER_MINOR_VERSION 1
 
-/* stats.busy_time threshold for determining if the given workload is idle.
-   Any workload higher than this will be treated as a non-idle workload.
-   Adreno ramper will more actively try to ramp up the frequency
-   if this is set to a higher value. */
 static unsigned long nonidleworkload = 20000;
 module_param_named(adreno_ramper_nonidleworkload, nonidleworkload, ulong, 0664);
-
-/* Number of events to wait before ramping down the frequency.
-   The idlewait'th events before current one must be all idle before
-   Adreno idler ramps down the frequency.
-   This implementation is to prevent micro-lags on scrolling or playing games.
-   Adreno idler will more actively try to ramp down the frequency
-   if this is set to a lower value. */
 static unsigned int rampwait = 15;
 module_param_named(adreno_ramper_rampwait, rampwait, uint, 0664);
-
-/* Taken from ondemand */
 static unsigned int downdifferential = 20;
 module_param_named(adreno_ramper_downdifferential, downdifferential, uint, 0664);
-
-/* Master switch to activate the whole routine */
 static bool adreno_ramper_active = true;
-
 module_param_named(adreno_ramper_active, adreno_ramper_active, bool, 0664);
-
 static unsigned int idlecount = 0;
-
 int adreno_ramper(struct devfreq_dev_status stats, struct devfreq *devfreq,
 		 unsigned long *freq)
 {
 	if (!adreno_ramper_active)
+	{
 		return 0;
-
+	}
 	if (stats.busy_time > nonidleworkload) {
-
-		/* busy_time >= idleworkload should be considered as a non-idle workload. */
-
 		idlecount++;
 		if (*freq == devfreq->profile->freq_table[devfreq->profile->max_state - 1]) {
-
 			/* Frequency is already at its lowest.
 			   No need to calculate things, so bail out. */
-
 			return 1;
 		}
 		if (idlecount > rampwait &&
@@ -78,7 +56,6 @@ int adreno_ramper(struct devfreq_dev_status stats, struct devfreq *devfreq,
 			return 1;
 		}
 	}
-} 
 	else {
 		idlecount = 0;
 		/* Do not return 1 here and allow rest of the algorithm to
