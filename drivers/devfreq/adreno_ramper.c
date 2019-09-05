@@ -18,8 +18,10 @@
 */
 
 // xor3d: Check for Adreno Idler init
-#ifdef CONFIG_ADRENO_IDLER
-#error Adreno Idler is enabled. Choose between Idler and Ramper.
+// nergzd723: We dont need such since the modules are different
+// #ifdef CONFIG_ADRENO_IDLER
+// #error Adreno Idler is enabled. Choose between Idler and Ramper.
+// #endif
 
 #include <linux/module.h>
 #include <linux/devfreq.h>
