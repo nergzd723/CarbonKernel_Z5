@@ -17,6 +17,10 @@
     GNU GPLv2
 */
 
+// xor3d: Check for Adreno Idler init
+#ifdef CONFIG_ADRENO_IDLER
+#error Adreno Idler is enabled. Choose between Idler and Ramper.
+
 #include <linux/module.h>
 #include <linux/devfreq.h>
 #include <linux/msm_adreno_devfreq.h>
@@ -54,8 +58,7 @@ static unsigned int idlecount = 0;
 int adreno_ramper(struct devfreq_dev_status stats, struct devfreq *devfreq,
 		 unsigned long *freq)
 {
-	if (!adreno_ramper_active)
-		return 0;
+	if (!adreno_ramper_active) return 0;
 
 	if (stats.busy_time > nonidleworkload) {
 
@@ -76,14 +79,12 @@ int adreno_ramper(struct devfreq_dev_status stats, struct devfreq *devfreq,
             		printk("Got ramped!\n");
 			idlecount--;
 			return 1;
+		} else {
+			idlecount = 0;
+			/* Do not return 1 here and allow rest of the algorithm to
+			   figure out the appropriate frequency for current workload.
+			   It can even set it back to the lowest frequency. */
 		}
-	}
-} 
-	else {
-		idlecount = 0;
-		/* Do not return 1 here and allow rest of the algorithm to
-		   figure out the appropriate frequency for current workload.
-		   It can even set it back to the lowest frequency. */
 	}
 	return 0;
 }
