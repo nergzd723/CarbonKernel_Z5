@@ -106,6 +106,5 @@ static void __exit adreno_ramper_exit(void)
 module_exit(adreno_ramper_exit);
 
 MODULE_AUTHOR("Mark Hargreaves <clashclanacc2602@gmail.com> ");
-MODULE_DESCRIPTION("'adreno_ramper - A powersaver for Adreno TZ"
-	"Control fastening algorithm for Adreno GPU series");
+MODULE_DESCRIPTION("adreno_ramper - A powersaver for Adreno TZ Control fastening algorithm for Adreno GPU series");
 MODULE_LICENSE("GPL");
