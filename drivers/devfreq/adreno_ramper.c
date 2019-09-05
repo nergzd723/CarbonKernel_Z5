@@ -40,15 +40,11 @@ static unsigned int idlecount = 0;
 int adreno_ramper(struct devfreq_dev_status stats, struct devfreq *devfreq,
 		 unsigned long *freq)
 {
-<<<<<<< HEAD
 	if (!adreno_ramper_active) return 0;
-
-=======
 	if (!adreno_ramper_active)
 	{
 		return 0;
 	}
->>>>>>> feb4427b2af8eae00b28119709c4225106460395
 	if (stats.busy_time > nonidleworkload) {
 		idlecount++;
 		if (*freq == devfreq->profile->freq_table[devfreq->profile->max_state - 1]) {
@@ -71,15 +67,12 @@ int adreno_ramper(struct devfreq_dev_status stats, struct devfreq *devfreq,
 			   It can even set it back to the lowest frequency. */
 		}
 	}
-<<<<<<< HEAD
-=======
 	else {
 		idlecount = 0;
 		/* Do not return 1 here and allow rest of the algorithm to
 		   figure out the appropriate frequency for current workload.
 		   It can even set it back to the lowest frequency. */
 	}
->>>>>>> feb4427b2af8eae00b28119709c4225106460395
 	return 0;
 }
 EXPORT_SYMBOL(adreno_ramper);
